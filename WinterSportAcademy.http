@@ -1,0 +1,6 @@
+@WinterSportAcademy_HostAddress = http://localhost:5150
+
+GET {{FinanceTracker_2026_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
