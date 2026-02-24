@@ -14,5 +14,6 @@ public class WinterSportAcademyContext : DbContext
     
     public DbSet<Registration> Registrations {get; set;}
      public DbSet<Equipment> Equipments {get; set;}
+    public DbSet<WinterSportAcademy.Models.TrainingSession> TrainingSession { get; set; } = default!;
     
 }
