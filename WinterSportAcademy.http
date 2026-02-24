@@ -1,0 +1,6 @@
+@WinterSportAcademy_HostAddress = http://localhost:5011
+
+GET {{WinterSportAcademy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
