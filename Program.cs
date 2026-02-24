@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WinterSportAcademy.Data;
+using Microsoft.AspNetCore.Identity;
+using WinterSportAcademy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WinterSportAcademyContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+.AddEntityFrameworkStores<WinterSportAcademyContext>().AddDefaultTokenProviders();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<EmailService>();
+
 
 var app = builder.Build();
 
