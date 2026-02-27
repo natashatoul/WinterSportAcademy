@@ -44,6 +44,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<ITraineeService, TraineeService>();
+
 
 
 var app = builder.Build();
