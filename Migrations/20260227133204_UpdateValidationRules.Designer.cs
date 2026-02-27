@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WinterSportAcademy.Data;
 
@@ -10,9 +11,11 @@ using WinterSportAcademy.Data;
 namespace WinterSportAcademy.Migrations
 {
     [DbContext(typeof(WinterSportAcademyContext))]
-    partial class WinterSportAcademyContextModelSnapshot : ModelSnapshot
+    [Migration("20260227133204_UpdateValidationRules")]
+    partial class UpdateValidationRules
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -227,26 +230,15 @@ namespace WinterSportAcademy.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Size")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Specification")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("TraineeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("TrainingSessionId")
+                    b.Property<int>("TraineeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("EquipmentId");
 
                     b.HasIndex("TraineeId");
-
-                    b.HasIndex("TrainingSessionId");
 
                     b.ToTable("Equipments");
                 });
@@ -255,6 +247,9 @@ namespace WinterSportAcademy.Migrations
                 {
                     b.Property<int>("InstructorId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EquipmentId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FirstName")
@@ -407,15 +402,11 @@ namespace WinterSportAcademy.Migrations
                 {
                     b.HasOne("WinterSportAcademy.Models.Trainee", "Trainee")
                         .WithMany("RentEquipment")
-                        .HasForeignKey("TraineeId");
-
-                    b.HasOne("WinterSportAcademy.Models.TrainingSession", "TrainingSession")
-                        .WithMany()
-                        .HasForeignKey("TrainingSessionId");
+                        .HasForeignKey("TraineeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Trainee");
-
-                    b.Navigation("TrainingSession");
                 });
 
             modelBuilder.Entity("WinterSportAcademy.Models.Registration", b =>

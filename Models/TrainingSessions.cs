@@ -1,11 +1,18 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace WinterSportAcademy.Models;
 public class TrainingSession // details about session and instractors
 {
+    [Key]
     public int  TrainingSessionId {get; set;}
+    [Required(ErrorMessage = "This field can'e be null!")]
+    [StringLength(200)]
     public String Title {get; set;} = string.Empty;
+    [Required]
+    [DataType(DataType.DateTime)]
     public DateTime StartTime {get; set;}
+    [Required]
     public int InstructorId {get; set;} 
     public Instructor? Instructor {get; set;}
 
