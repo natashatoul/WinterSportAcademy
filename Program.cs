@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using WinterSportAcademy.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
+using WinterSportAcademy.Repositories;
 
 // program is the starting point of the application
 
@@ -44,7 +45,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<TraineeRepository>();
 builder.Services.AddScoped<ITraineeService, TraineeService>();
+builder.Services.AddScoped<InstructorRepository>();
+builder.Services.AddScoped<IInstructorService, InstructorService>();
+builder.Services.AddScoped<TrainingSessionRepository>();
+builder.Services.AddScoped<ITrainingSessionService, TrainingSessionService>();
 
 
 
