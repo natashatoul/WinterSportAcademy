@@ -161,5 +161,11 @@ namespace WinterSportAcademy.Controllers
             return NoContent();
         }
 
+        [HttpGet("Hello")]
+        public ActionResult<string> SayHello()
+        {
+            return "Hello. world!";
+        }
+
     }
 }

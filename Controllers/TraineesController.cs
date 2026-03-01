@@ -13,7 +13,7 @@ namespace WinterSportAcademy.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // controller completly close with authorisation
+    //[Authorize] // controller completly close with authorisation
     public class TraineesController : ControllerBase
     {
         // use servise interface, not database context
@@ -125,6 +125,12 @@ namespace WinterSportAcademy.Controllers
             _logger.LogInformation("Admin is deleting trainee ID {Id}", id);
             await _traineeService.DeleteAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("Hello")]
+        public ActionResult<string> SayHello()
+        {
+            return "Hello. world!";
         }
     }
 }
