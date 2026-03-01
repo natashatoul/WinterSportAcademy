@@ -57,6 +57,7 @@ namespace WinterSportAcademy.Controllers
 
         // PUT: api/Registrations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRegistration(int id, Registration registration)
         {
@@ -86,18 +87,23 @@ namespace WinterSportAcademy.Controllers
             _context.Entry(registration).State = EntityState.Modified;
 
             try
-            {
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Registration {Id} updated.", id);
+    {
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Registration {Id} updated.", id);
             }
             catch (DbUpdateConcurrencyException ex)
             {
+                // Вот это и есть "Proper handling": мы проверяем, существует ли запись
                 if (!RegistrationExists(id)) return NotFound();
-                else 
-                {
-                    _logger.LogError(ex, "Error! Can' update session {Id}", id);
-                    throw;
-                }
+
+                _logger.LogError(ex, "Concurrency error for registration {Id}", id);
+                throw; // Пробрасываем в Middleware для финальной обработки
+            }
+            catch (Exception ex)
+            {
+                // Ловим другие ошибки БД, логируем их локально
+                _logger.LogError(ex, "Database error during update of registration {Id}", id);
+                throw;
             }
 
             return NoContent();
@@ -156,10 +162,10 @@ namespace WinterSportAcademy.Controllers
 
             return NoContent();
         }
-
         private bool RegistrationExists(int id)
         {
             return _context.Registrations.Any(e => e.RegistrationNumber == id);
         }
+
     }
 }

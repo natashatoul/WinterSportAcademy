@@ -61,7 +61,9 @@ namespace WinterSportAcademy.Controllers
         }
 
         // PUT: api/Equipments/5
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut("{id}")]
+        
         public async Task<IActionResult> PutEquipment(int id, Equipment equipment)
         {
             if (id != equipment.EquipmentId)
@@ -106,23 +108,9 @@ namespace WinterSportAcademy.Controllers
 
             _context.Entry(equipment).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Equipment {Id} updated successfully", id);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EquipmentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Equipment {Id} updated successfully", id);
             return NoContent();
         }
 
@@ -150,17 +138,10 @@ namespace WinterSportAcademy.Controllers
                     }
                 }
             }
-            try
-            {
-                _context.Equipments.Add(equipment);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction("GetEquipment", new { id = equipment.EquipmentId }, equipment);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add equipment.");
-                return StatusCode(500, "Internal server error");
-            }
+            _context.Equipments.Add(equipment);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetEquipment), new { id = equipment.EquipmentId }, equipment);
         }
 
         // DELETE: api/Equipments/5
@@ -180,9 +161,5 @@ namespace WinterSportAcademy.Controllers
             return NoContent();
         }
 
-        private bool EquipmentExists(int id)
-        {
-            return _context.Equipments.Any(e => e.EquipmentId == id);
-        }
     }
 }

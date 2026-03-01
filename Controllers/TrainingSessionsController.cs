@@ -54,6 +54,7 @@ namespace WinterSportAcademy.Controllers
 
         // PUT: api/TrainingSessions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTrainingSession(int id, TrainingSessionDto dto)
         {
@@ -81,8 +82,9 @@ namespace WinterSportAcademy.Controllers
         }
 
         // DELETE: api/TrainingSessions/5
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete("{id}")]
-        [Authorize(Roles = UserRoles.Admin)] 
+        
         public async Task<IActionResult> DeleteTrainingSession(int id)
         {
             var result = await _service.DeleteSessionAsync(id);

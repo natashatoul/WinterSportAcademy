@@ -9,7 +9,6 @@ public class WinterSportAcademyContext : IdentityDbContext<IdentityUser>
 {
     public WinterSportAcademyContext(DbContextOptions<WinterSportAcademyContext> options) : base(options)
     {
-        
     }
     public DbSet<Trainee> Trainees {get; set;}
     public DbSet<Instructor> Instructors {get; set;}

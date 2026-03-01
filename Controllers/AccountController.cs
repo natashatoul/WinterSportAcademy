@@ -34,7 +34,7 @@ namespace WinterSportAcademy.Controllers
         public async Task<IActionResult> Register(AuthModel model)
         {
             var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);// CreateAsync it is Hashing и Salting(PBKDF2 algorithm)if passwords will be corrupted they are protected 
             if (result.Succeeded)
             {
                 // Generate an email verification token

@@ -12,7 +12,9 @@ public class Equipment //one-to-many
     
     public string? Specification {get; set;} // e.g., "Female", "Professional", "Hockey"
     public string? Size {get; set;}// e.g., "175cm", "42", "L"
+    [DataType(DataType.DateTime)]
     public DateTime StartTime {get; set;}
+    
     [DataType(DataType.DateTime)]
     public DateTime EndTime {get; set;}
     public int? TraineeId {get; set;}//if is not null this equipment is not avalible

@@ -15,7 +15,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo 
+    { 
+        Title = "Winter Sport Academy API", 
+        Version = "v1",
+        Description = "API for managing trainees, instructors, and training sessions."
+    });
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WinterSportAcademyContext>(options =>
@@ -44,7 +56,9 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
+builder.Services.AddHealthChecks();
 
+//Dependency Injection
 builder.Services.AddScoped<TraineeRepository>();
 builder.Services.AddScoped<ITraineeService, TraineeService>();
 builder.Services.AddScoped<InstructorRepository>();
@@ -62,6 +76,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+// Global Exception Handling Middleware to catch and log all unhandled exceptions.
+// Promotes Clean Code and Separation of Concerns by removing try-catch blocks from controllers.
+app.UseMiddleware<WinterSportAcademy.Middleware.ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
@@ -87,6 +104,7 @@ app.MapGet("/weatherforecast", () =>
 app.MapControllers();
 app.UseAuthentication();// Authentication is that everyone who has an account should be able to login.
 app.UseAuthorization();//Authorisation is the one who has got the role or the privilege should be able to, you know, do certain bits.
+app.MapHealthChecks("/health");
 
 app.Run();
 
