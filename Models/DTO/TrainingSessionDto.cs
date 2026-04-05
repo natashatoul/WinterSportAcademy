@@ -12,8 +12,7 @@ public class TrainingSessionDto
 
     public string FormattedStartTime { get; set; } = string.Empty;
 
-    [JsonIgnore]
-    public DateTime StartTime { get; set; }
+    public DateTime StartTime { get; set; }  // deleted [JsonIgnore]
 
     [Required]
     public int InstructorId { get; set; }

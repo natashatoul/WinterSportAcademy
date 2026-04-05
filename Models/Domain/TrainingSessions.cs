@@ -21,5 +21,7 @@ public class TrainingSession // details about session and instractors
 // Prevents circular references and stops the API from crashing
 // Added to fix the "infinite loop" error mentioned in the lecture.
     public List<Registration> Registrations {get; set;} = new(); // one instructor has many sessions
+    [JsonIgnore]
+    public List<Equipment> Equipments { get; set; } = new();
 
 } 

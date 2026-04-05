@@ -15,6 +15,6 @@ public class InstructorDto
     public string LastName { get; set; } = string.Empty;
 
     [Required]
-    [RegularExpression("^(Skiing|Snowboarding|Skating)$")]
+    [RegularExpression("^(Skiing|Snowboarding|Skating|Hockey)$")]
     public string Specialisation { get; set; } = string.Empty;
 }
