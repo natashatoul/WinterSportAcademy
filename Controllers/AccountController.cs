@@ -72,6 +72,11 @@ namespace WinterSportAcademy.Controllers
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return Unauthorized("Invalid login attempt.");
+                }
+
                 var roles = await _userManager.GetRolesAsync(user);
                 var token = GenerateJwtToken(user, roles);
                 return Ok(new { Token = token });
@@ -86,9 +91,13 @@ namespace WinterSportAcademy.Controllers
         }
         private string GenerateJwtToken(IdentityUser user, IList<string> roles)
         {
+            var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.");
+            var jwtIssuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+            var subject = user.Email ?? user.UserName ?? user.Id;
+
             var claims = new List<Claim>
 {
-new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+new Claim(JwtRegisteredClaimNames.Sub, subject),
 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 };
             // Add roles as claims
@@ -96,12 +105,12 @@ new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:ExpireHours"]));
             var token = new JwtSecurityToken(
-            _configuration["Jwt:Issuer"],
-            _configuration["Jwt:Issuer"],
+            jwtIssuer,
+            jwtIssuer,
             claims,
             expires: expires,
             signingCredentials: creds
