@@ -22,32 +22,42 @@ namespace WinterSportAcademy.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly EmailService _emailService;
         private readonly IConfiguration _configuration;
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, EmailService emailService,
-        IConfiguration configuration)
+        private readonly ITraineeService _traineeService;
+
+        public AccountController(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            EmailService emailService,
+            IConfiguration configuration,
+            ITraineeService traineeService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
             _configuration = configuration;
+            _traineeService = traineeService;
         }
         [HttpPost("register")]
-        public async Task<IActionResult> Register(AuthModel model)
+        public async Task<IActionResult> Register(TraineeRegisterModel model)
         {
             var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-            var result = await _userManager.CreateAsync(user, model.Password);// CreateAsync it is Hashing и Salting(PBKDF2 algorithm)if passwords will be corrupted they are protected 
-            if (result.Succeeded)
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            await _userManager.AddToRoleAsync(user, UserRoles.Trainee);
+
+            var trainee = await _traineeService.CreateAsync(new TraineeDto
             {
-                // Generate an email verification token
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                // Create the verification link
-                var verificationLink = Url.Action("VerifyEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
-                // Send the verification email
-                var emailSubject = "Email Verification";
-                var emailBody = $"Please verify your email by clicking the following link: {verificationLink}";
-                _emailService.SendEmail(user.Email, emailSubject, emailBody);
-                return Ok("User registered successfully. An email verification link has been sent.");
-            }
-            return BadRequest(result.Errors);
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                SkillLevel = model.SkillLevel
+            });
+
+            await _userManager.AddClaimAsync(user, new Claim("TraineeId", trainee.TraineeId.ToString()));
+
+            return Ok("User registered successfully.");
         }
         // Add an action to handle email verification
         [HttpGet("verify-email")]
@@ -78,7 +88,7 @@ namespace WinterSportAcademy.Controllers
                 }
 
                 var roles = await _userManager.GetRolesAsync(user);
-                var token = GenerateJwtToken(user, roles);
+                var token = await GenerateJwtToken(user, roles);
                 return Ok(new { Token = token });
             }
             return Unauthorized("Invalid login attempt.");
@@ -89,7 +99,7 @@ namespace WinterSportAcademy.Controllers
             await _signInManager.SignOutAsync();//then click thay on the server side it would remove tooken
             return Ok("Logged out");
         }
-        private string GenerateJwtToken(IdentityUser user, IList<string> roles)
+        private async Task<string> GenerateJwtToken(IdentityUser user, IList<string> roles)
         {
             var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.");
             var jwtIssuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
@@ -105,6 +115,10 @@ new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
+
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            claims.AddRange(userClaims);
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:ExpireHours"]));

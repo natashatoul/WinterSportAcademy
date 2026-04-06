@@ -85,6 +85,29 @@ namespace WinterSportAcademy.Controllers
             return CreatedAtAction(nameof(GetEquipment), new { id = equipment.EquipmentId }, equipment);
         }
 
+        [Authorize]
+        [HttpPost("{id}/rent")]
+        public async Task<IActionResult> RentEquipment(int id)
+        {
+            var traineeIdClaim = User.FindFirst("TraineeId")?.Value;
+            if (!int.TryParse(traineeIdClaim, out var traineeId))
+            {
+                return BadRequest("Trainee profile is not linked to this account.");
+            }
+
+            var error = await _service.RentToTraineeAsync(id, traineeId);
+            if (error != null)
+            {
+                if (error == "Equipment not found")
+                {
+                    return NotFound(error);
+                }
+                return BadRequest(error);
+            }
+
+            return Ok("Equipment rented successfully.");
+        }
+
         // DELETE: api/Equipments/5
         [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete("{id}")]

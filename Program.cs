@@ -96,6 +96,21 @@ builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
 var app = builder.Build();
 
+// Ensure core roles exist for account registration and authorization flows.
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var requiredRoles = new[] { UserRoles.Admin, UserRoles.Instructor, UserRoles.Trainee };
+
+    foreach (var role in requiredRoles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

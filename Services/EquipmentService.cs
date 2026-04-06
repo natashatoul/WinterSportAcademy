@@ -10,6 +10,7 @@ public interface IEquipmentService
     Task<Equipment?> GetByIdAsync(int id);
     Task<(Equipment? Equipment, string? Error)> CreateAsync(EquipmentDto dto);
     Task<string?> UpdateAsync(int id, EquipmentDto dto);
+    Task<string?> RentToTraineeAsync(int equipmentId, int traineeId);
     Task<bool> DeleteAsync(int id);
 }
 
@@ -109,5 +110,25 @@ public class EquipmentService : IEquipmentService
         await _repo.DeleteAsync(equipment);
         _logger.LogInformation("Equipment {Id} deleted", id);
         return true;
+    }
+
+    public async Task<string?> RentToTraineeAsync(int equipmentId, int traineeId)
+    {
+        var equipment = await _repo.GetByIdAsync(equipmentId);
+        if (equipment == null)
+        {
+            return "Equipment not found";
+        }
+
+        if (equipment.TraineeId != null || equipment.TrainingSessionId != null)
+        {
+            return "Equipment is not available.";
+        }
+
+        equipment.TraineeId = traineeId;
+        equipment.StartTime ??= DateTime.UtcNow;
+        await _repo.UpdateAsync(equipment);
+        _logger.LogInformation("Equipment {EquipmentId} rented by trainee {TraineeId}", equipmentId, traineeId);
+        return null;
     }
 }
