@@ -70,11 +70,24 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddHealthChecks();
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowReactApp", builder =>
+//     {
+//         builder.WithOrigins("http://localhost:5173", "https://your-netlify-site.netlify.app")
+//                .AllowAnyHeader()
+//                .AllowAnyMethod();
+//     });
+// });
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", builder =>
+    options.AddPolicy("AllowReactApp", policy => 
     {
-        builder.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+                "http://localhost:5173", 
+                "https://shimmering-dusk-8246dd.netlify.app" 
+               )
                .AllowAnyHeader()
                .AllowAnyMethod();
     });
@@ -127,7 +140,12 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+app.UseCors("AllowReactApp");
+app.UseAuthentication();// Authentication is that everyone who has an account should be able to login.
+app.UseAuthorization();//Authorisation is the one who has got the role or the privilege should be able to, you know, do certain bits.
+app.MapControllers();
 
+app.MapHealthChecks("/health");
 app.MapGet("/weatherforecast", () =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -142,11 +160,6 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
-app.MapControllers();
-app.UseCors("AllowReactApp");
-app.UseAuthentication();// Authentication is that everyone who has an account should be able to login.
-app.UseAuthorization();//Authorisation is the one who has got the role or the privilege should be able to, you know, do certain bits.
-app.MapHealthChecks("/health");
 
 
 
